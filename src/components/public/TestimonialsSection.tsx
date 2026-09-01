@@ -26,7 +26,7 @@ export const TestimonialsSection: React.FC = () => {
   };
 
   return (
-    <section className="py-24 relative bg-slate-950">
+    <section id="testimonials" className="py-24 relative bg-slate-950">
       {/* Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 blur-[130px] pointer-events-none rounded-full" />
 

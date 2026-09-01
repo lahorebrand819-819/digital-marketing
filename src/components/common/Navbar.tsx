@@ -8,7 +8,8 @@ import {
   ArrowRight,
   TrendingUp,
   Phone,
-  ShieldCheck
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -114,12 +115,21 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate, onOpe
           {isAuthenticated ? (
             <button
               onClick={onOpenAdmin}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 transition-all"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Admin Panel</span>
             </button>
-          ) : null}
+          ) : (
+            <button
+              onClick={onOpenAdmin}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all"
+              title="Admin Panel Login"
+            >
+              <Lock className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Admin</span>
+            </button>
+          )}
 
           <button
             onClick={() => handleLinkClick('contact')}

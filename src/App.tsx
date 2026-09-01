@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AgencyProvider, useAgency } from './context/AgencyContext';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
@@ -23,6 +23,9 @@ const MainContent: React.FC = () => {
   const { isLoading, isAuthenticated } = useAgency();
   const [isAdminView, setIsAdminView] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [selectedService, setSelectedService] = useState('');
+  const [selectedPackage, setSelectedPackage] = useState('');
 
   const handleOpenAdmin = () => {
     if (isAuthenticated) {
@@ -36,6 +39,50 @@ const MainContent: React.FC = () => {
     setShowLoginModal(false);
     setIsAdminView(true);
   };
+
+  const handleNavigate = (sectionId: string) => {
+    setActiveSection(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleSelectPackage = (pkgName: string) => {
+    setSelectedPackage(pkgName);
+    setSelectedService('');
+    handleNavigate('contact');
+  };
+
+  const handleSelectService = (serviceTitle: string) => {
+    setSelectedService(serviceTitle);
+    setSelectedPackage('');
+    handleNavigate('contact');
+  };
+
+  // Scroll listener to update active section in navbar
+  useEffect(() => {
+    if (isAdminView) return;
+
+    const sections = ['home', 'services', 'pricing', 'portfolio', 'case-studies', 'about', 'blog', 'contact'];
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 200;
+      for (const sId of sections) {
+        const el = document.getElementById(sId);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(sId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isAdminView]);
 
   if (isLoading) {
     return (
@@ -61,23 +108,33 @@ const MainContent: React.FC = () => {
       ) : (
         /* Public Live Website View */
         <>
-          <Navbar onOpenAdmin={handleOpenAdmin} />
+          <Navbar
+            activeSection={activeSection}
+            onNavigate={handleNavigate}
+            onOpenAdmin={handleOpenAdmin}
+          />
           
           <main>
-            <HeroSection />
-            <ServicesSection />
+            <HeroSection
+              onGetStarted={() => handleNavigate('contact')}
+              onViewWork={() => handleNavigate('portfolio')}
+            />
+            <ServicesSection onSelectServiceForInquiry={handleSelectService} />
             <ProcessSection />
             <CaseStudiesSection />
             <PortfolioSection />
-            <PricingSection />
+            <PricingSection onSelectPackage={handleSelectPackage} />
             <AboutSection />
             <TestimonialsSection />
             <BlogSection />
             <FAQSection />
-            <ContactSection />
+            <ContactSection
+              initialService={selectedService}
+              initialPackage={selectedPackage}
+            />
           </main>
 
-          <Footer onOpenAdmin={handleOpenAdmin} />
+          <Footer onNavigate={handleNavigate} onOpenAdmin={handleOpenAdmin} />
 
           {/* Floating WhatsApp Quick Connect */}
           <WhatsAppButton />

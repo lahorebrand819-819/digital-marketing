@@ -20,8 +20,8 @@ import {
   CurrencyConfig
 } from './src/types';
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'digital';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '1234567890qwert$&A';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'marketing';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '25802580';
 const ACTIVE_TOKENS = new Set<string>();
 
 // Setup multer storage for direct file uploads

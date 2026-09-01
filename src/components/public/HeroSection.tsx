@@ -24,7 +24,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onGetStarted, onViewWo
   const settings = data?.settings;
 
   return (
-    <section className="relative min-h-[90vh] pt-32 pb-20 overflow-hidden flex items-center bg-slate-950">
+    <section id="home" className="relative min-h-[90vh] pt-32 pb-20 overflow-hidden flex items-center bg-slate-950">
       {/* Background Gradients & Ambient Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[850px] h-[450px] bg-gradient-to-tr from-indigo-600/15 via-purple-600/10 to-transparent blur-[120px] pointer-events-none rounded-full" />
       <div className="absolute bottom-10 right-10 w-80 h-80 bg-violet-500/10 blur-[100px] pointer-events-none rounded-full" />

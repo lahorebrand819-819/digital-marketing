@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useAgency } from '../../context/AgencyContext';
 import {
   Lock,
-  Mail,
+  User,
   ShieldCheck,
   ArrowRight,
-  TrendingUp,
   Loader2,
   AlertCircle,
   KeyRound,
@@ -20,8 +19,8 @@ interface AdminLoginProps {
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onClose, onSuccess }) => {
   const { login } = useAgency();
-  const [email, setEmail] = useState('admin@digitalgrowthagency.com');
-  const [password, setPassword] = useState('admin123');
+  const [username, setUsername] = useState('marketing');
+  const [password, setPassword] = useState('25802580');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -30,13 +29,13 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onClose, onSuccess }) =>
     setErrorMsg('');
     setIsLoading(true);
 
-    const result = await login(email, password);
+    const result = await login(username, password);
     setIsLoading(false);
 
     if (result.success) {
       onSuccess();
     } else {
-      setErrorMsg(result.error || 'Invalid credentials. Please verify your password.');
+      setErrorMsg(result.error || 'Invalid credentials. Please verify your username and password.');
     }
   };
 
@@ -81,17 +80,18 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onClose, onSuccess }) =>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Admin Email
+              Username
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
-                type="email"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
-                placeholder="admin@digitalgrowthagency.com"
+                placeholder="Enter username"
+                autoComplete="username"
               />
             </div>
           </div>
@@ -109,6 +109,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onClose, onSuccess }) =>
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
             </div>
           </div>
@@ -117,19 +118,19 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onClose, onSuccess }) =>
           <div className="p-3 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-[11px] text-slate-300 space-y-1">
             <div className="font-bold text-indigo-300 flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Demo Master Credentials</span>
+              <span>Admin Credentials</span>
             </div>
             <div className="text-slate-400 font-mono text-[10px]">
-              Email: <span className="text-slate-200">admin@digitalgrowthagency.com</span>
+              Username: <span className="text-slate-200 font-bold">marketing</span>
               <br />
-              Password: <span className="text-slate-200">admin123</span>
+              Password: <span className="text-slate-200 font-bold">25802580</span>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {isLoading ? (
               <>
