@@ -120,13 +120,13 @@ export const AdminPricing: React.FC = () => {
               <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-1 mb-4">
                 <div className="text-slate-400 font-medium">Configured Rates:</div>
                 <div className="text-emerald-400 font-bold text-sm">
-                  PKR: Rs. {pkg.pricePKR.toLocaleString()}
+                  PKR: Rs. {(pkg.pricePKR ?? 0).toLocaleString()}
                 </div>
                 <div className="text-indigo-400 font-bold text-sm">
-                  USD: ${pkg.priceUSD.toLocaleString()}
+                  USD: ${(pkg.priceUSD ?? 0).toLocaleString()}
                 </div>
                 <div className="text-purple-400 font-bold text-sm">
-                  GBP: £{pkg.priceGBP.toLocaleString()}
+                  GBP: £{(pkg.priceGBP ?? 0).toLocaleString()}
                 </div>
               </div>
 

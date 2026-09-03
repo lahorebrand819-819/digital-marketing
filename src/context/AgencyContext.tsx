@@ -13,7 +13,16 @@ import {
   LeadInquiry,
   MediaItem,
   WebsiteSettings,
-  CurrencyConfig
+  CurrencyConfig,
+  ClientProfile,
+  ProjectItem,
+  TaskItem,
+  CampaignItem,
+  ResearchProject,
+  IntegrationSource,
+  AuditLog,
+  FinanceInvoice,
+  AdminNotification
 } from '../types';
 
 interface ToastMessage {
@@ -28,7 +37,7 @@ interface AgencyContextType {
   error: string | null;
   currentCurrency: CurrencyCode;
   setCurrency: (code: CurrencyCode) => void;
-  formatPrice: (pkr: number, usd: number, gbp: number, currencyOverride?: CurrencyCode) => string;
+  formatPrice: (pkr?: number, usd?: number, gbp?: number, currencyOverride?: CurrencyCode) => string;
   submitLead: (leadData: Partial<LeadInquiry>) => Promise<{ success: boolean; message: string }>;
   
   // Auth
@@ -109,7 +118,47 @@ interface AgencyContextType {
   // Leads helpers
   updateLeadStatus: (id: string, status: LeadInquiry['status'], notes?: string) => Promise<boolean>;
   updateLead: (id: string, updates: Partial<LeadInquiry>) => Promise<boolean>;
+  createLead: (lead: Partial<LeadInquiry>) => Promise<boolean>;
+  importLeads: (leads: Partial<LeadInquiry>[]) => Promise<boolean>;
   deleteLead: (id: string) => Promise<boolean>;
+
+  // Clients helpers
+  createClient: (client: Partial<ClientProfile>) => Promise<boolean>;
+  updateClient: (id: string, client: Partial<ClientProfile>) => Promise<boolean>;
+  deleteClient: (id: string) => Promise<boolean>;
+
+  // Projects helpers
+  createProject: (project: Partial<ProjectItem>) => Promise<boolean>;
+  updateProject: (id: string, project: Partial<ProjectItem>) => Promise<boolean>;
+  deleteProject: (id: string) => Promise<boolean>;
+
+  // Tasks helpers
+  createTask: (task: Partial<TaskItem>) => Promise<boolean>;
+  updateTask: (id: string, task: Partial<TaskItem>) => Promise<boolean>;
+  deleteTask: (id: string) => Promise<boolean>;
+
+  // Campaigns helpers
+  createCampaign: (campaign: Partial<CampaignItem>) => Promise<boolean>;
+  updateCampaign: (id: string, campaign: Partial<CampaignItem>) => Promise<boolean>;
+  deleteCampaign: (id: string) => Promise<boolean>;
+
+  // Research helpers
+  createResearchProject: (research: Partial<ResearchProject>) => Promise<boolean>;
+  updateResearchProject: (id: string, research: Partial<ResearchProject>) => Promise<boolean>;
+  deleteResearchProject: (id: string) => Promise<boolean>;
+
+  // Integrations helpers
+  saveIntegrations: (integrations: IntegrationSource[]) => Promise<boolean>;
+
+  // Finance helpers
+  createInvoice: (invoice: Partial<FinanceInvoice>) => Promise<boolean>;
+  updateInvoice: (id: string, invoice: Partial<FinanceInvoice>) => Promise<boolean>;
+  deleteInvoice: (id: string) => Promise<boolean>;
+
+  // Audit Logs & Notifications
+  recordAuditLog: (action: string, record: string, changesMade: string) => Promise<boolean>;
+  markNotificationRead: (id: string) => Promise<boolean>;
+  deleteNotification: (id: string) => Promise<boolean>;
 
   // Media helpers
   deleteMedia: (id: string) => Promise<boolean>;
@@ -216,15 +265,19 @@ export const AgencyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     localStorage.setItem('dga_currency', code);
   }, []);
 
-  const formatPrice = useCallback((pkr: number, usd: number, gbp: number, currencyOverride?: CurrencyCode) => {
+  const formatPrice = useCallback((pkr?: number, usd?: number, gbp?: number, currencyOverride?: CurrencyCode) => {
     const code = currencyOverride || currentCurrency;
+    const safePkr = typeof pkr === 'number' && !isNaN(pkr) ? pkr : 0;
+    const safeUsd = typeof usd === 'number' && !isNaN(usd) ? usd : Math.round(safePkr / 280);
+    const safeGbp = typeof gbp === 'number' && !isNaN(gbp) ? gbp : Math.round(safePkr / 360);
+
     if (code === 'USD') {
-      return `$${usd.toLocaleString()}`;
+      return `$${(safeUsd ?? 0).toLocaleString()}`;
     }
     if (code === 'GBP') {
-      return `£${gbp.toLocaleString()}`;
+      return `£${(safeGbp ?? 0).toLocaleString()}`;
     }
-    return `Rs. ${pkr.toLocaleString()}`;
+    return `Rs. ${(safePkr ?? 0).toLocaleString()}`;
   }, [currentCurrency]);
 
   const loginAdmin = async (username: string, password: string) => {
@@ -573,6 +626,321 @@ export const AgencyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return false;
   };
 
+  const createLead = async (lead: Partial<LeadInquiry>) => {
+    const res = await authFetch('/api/admin/leads', 'POST', lead);
+    if (res && res.lead) {
+      setData(prev => prev ? {
+        ...prev,
+        leads: [res.lead, ...(prev.leads || [])]
+      } : prev);
+      addToast('New lead added to CRM!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const importLeads = async (leads: Partial<LeadInquiry>[]) => {
+    const res = await authFetch('/api/admin/leads', 'POST', leads);
+    if (res && res.success) {
+      await fetchData(adminToken);
+      addToast(`Imported ${res.count || leads.length} leads successfully!`, 'success');
+      return true;
+    }
+    return false;
+  };
+
+  // Client helpers
+  const createClient = async (client: Partial<ClientProfile>) => {
+    const res = await authFetch('/api/admin/clients', 'POST', client);
+    if (res && res.client) {
+      setData(prev => prev ? {
+        ...prev,
+        clients: [res.client, ...(prev.clients || [])]
+      } : prev);
+      addToast('Client created successfully!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const updateClient = async (id: string, client: Partial<ClientProfile>) => {
+    const res = await authFetch(`/api/admin/clients/${id}`, 'PUT', client);
+    if (res && res.client) {
+      setData(prev => prev ? {
+        ...prev,
+        clients: (prev.clients || []).map(c => c.id === id ? res.client : c)
+      } : prev);
+      addToast('Client updated!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const deleteClient = async (id: string) => {
+    const res = await authFetch(`/api/admin/clients/${id}`, 'DELETE');
+    if (res) {
+      setData(prev => prev ? {
+        ...prev,
+        clients: (prev.clients || []).filter(c => c.id !== id)
+      } : prev);
+      addToast('Client removed.', 'info');
+      return true;
+    }
+    return false;
+  };
+
+  // Project helpers
+  const createProject = async (project: Partial<ProjectItem>) => {
+    const res = await authFetch('/api/admin/projects', 'POST', project);
+    if (res && res.project) {
+      setData(prev => prev ? {
+        ...prev,
+        projects: [res.project, ...(prev.projects || [])]
+      } : prev);
+      addToast('Project created!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const updateProject = async (id: string, project: Partial<ProjectItem>) => {
+    const res = await authFetch(`/api/admin/projects/${id}`, 'PUT', project);
+    if (res && res.project) {
+      setData(prev => prev ? {
+        ...prev,
+        projects: (prev.projects || []).map(p => p.id === id ? res.project : p)
+      } : prev);
+      addToast('Project updated!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const deleteProject = async (id: string) => {
+    const res = await authFetch(`/api/admin/projects/${id}`, 'DELETE');
+    if (res) {
+      setData(prev => prev ? {
+        ...prev,
+        projects: (prev.projects || []).filter(p => p.id !== id)
+      } : prev);
+      addToast('Project removed.', 'info');
+      return true;
+    }
+    return false;
+  };
+
+  // Task helpers
+  const createTask = async (task: Partial<TaskItem>) => {
+    const res = await authFetch('/api/admin/tasks', 'POST', task);
+    if (res && res.task) {
+      setData(prev => prev ? {
+        ...prev,
+        tasks: [res.task, ...(prev.tasks || [])]
+      } : prev);
+      addToast('Task created!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const updateTask = async (id: string, task: Partial<TaskItem>) => {
+    const res = await authFetch(`/api/admin/tasks/${id}`, 'PUT', task);
+    if (res && res.task) {
+      setData(prev => prev ? {
+        ...prev,
+        tasks: (prev.tasks || []).map(t => t.id === id ? res.task : t)
+      } : prev);
+      return true;
+    }
+    return false;
+  };
+
+  const deleteTask = async (id: string) => {
+    const res = await authFetch(`/api/admin/tasks/${id}`, 'DELETE');
+    if (res) {
+      setData(prev => prev ? {
+        ...prev,
+        tasks: (prev.tasks || []).filter(t => t.id !== id)
+      } : prev);
+      addToast('Task removed.', 'info');
+      return true;
+    }
+    return false;
+  };
+
+  // Campaign helpers
+  const createCampaign = async (campaign: Partial<CampaignItem>) => {
+    const res = await authFetch('/api/admin/campaigns', 'POST', campaign);
+    if (res && res.campaign) {
+      setData(prev => prev ? {
+        ...prev,
+        campaigns: [res.campaign, ...(prev.campaigns || [])]
+      } : prev);
+      addToast('Campaign launched!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const updateCampaign = async (id: string, campaign: Partial<CampaignItem>) => {
+    const res = await authFetch(`/api/admin/campaigns/${id}`, 'PUT', campaign);
+    if (res && res.campaign) {
+      setData(prev => prev ? {
+        ...prev,
+        campaigns: (prev.campaigns || []).map(c => c.id === id ? res.campaign : c)
+      } : prev);
+      addToast('Campaign updated!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const deleteCampaign = async (id: string) => {
+    const res = await authFetch(`/api/admin/campaigns/${id}`, 'DELETE');
+    if (res) {
+      setData(prev => prev ? {
+        ...prev,
+        campaigns: (prev.campaigns || []).filter(c => c.id !== id)
+      } : prev);
+      addToast('Campaign removed.', 'info');
+      return true;
+    }
+    return false;
+  };
+
+  // Research helpers
+  const createResearchProject = async (research: Partial<ResearchProject>) => {
+    const res = await authFetch('/api/admin/research', 'POST', research);
+    if (res && res.research) {
+      setData(prev => prev ? {
+        ...prev,
+        researchProjects: [res.research, ...(prev.researchProjects || [])]
+      } : prev);
+      addToast('Research study saved!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const updateResearchProject = async (id: string, research: Partial<ResearchProject>) => {
+    const res = await authFetch(`/api/admin/research/${id}`, 'PUT', research);
+    if (res && res.research) {
+      setData(prev => prev ? {
+        ...prev,
+        researchProjects: (prev.researchProjects || []).map(r => r.id === id ? res.research : r)
+      } : prev);
+      addToast('Research study updated!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const deleteResearchProject = async (id: string) => {
+    const res = await authFetch(`/api/admin/research/${id}`, 'DELETE');
+    if (res) {
+      setData(prev => prev ? {
+        ...prev,
+        researchProjects: (prev.researchProjects || []).filter(r => r.id !== id)
+      } : prev);
+      addToast('Research project removed.', 'info');
+      return true;
+    }
+    return false;
+  };
+
+  // Integration helpers
+  const saveIntegrations = async (integrations: IntegrationSource[]) => {
+    const res = await authFetch('/api/admin/integrations', 'PUT', integrations);
+    if (res && res.integrations) {
+      setData(prev => prev ? { ...prev, integrations: res.integrations } : prev);
+      addToast('Integration configurations saved!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  // Invoice helpers
+  const createInvoice = async (invoice: Partial<FinanceInvoice>) => {
+    const res = await authFetch('/api/admin/invoices', 'POST', invoice);
+    if (res && res.invoice) {
+      setData(prev => prev ? {
+        ...prev,
+        invoices: [res.invoice, ...(prev.invoices || [])]
+      } : prev);
+      addToast('Invoice created!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const updateInvoice = async (id: string, invoice: Partial<FinanceInvoice>) => {
+    const res = await authFetch(`/api/admin/invoices/${id}`, 'PUT', invoice);
+    if (res && res.invoice) {
+      setData(prev => prev ? {
+        ...prev,
+        invoices: (prev.invoices || []).map(i => i.id === id ? res.invoice : i)
+      } : prev);
+      addToast('Invoice updated!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const deleteInvoice = async (id: string) => {
+    const res = await authFetch(`/api/admin/invoices/${id}`, 'DELETE');
+    if (res) {
+      setData(prev => prev ? {
+        ...prev,
+        invoices: (prev.invoices || []).filter(i => i.id !== id)
+      } : prev);
+      addToast('Invoice removed.', 'info');
+      return true;
+    }
+    return false;
+  };
+
+  // Audit and notification helpers
+  const recordAuditLog = async (action: string, record: string, changesMade: string) => {
+    const res = await authFetch('/api/admin/audit-logs', 'POST', {
+      user: 'Administrator',
+      action,
+      record,
+      changesMade
+    });
+    if (res && res.log) {
+      setData(prev => prev ? {
+        ...prev,
+        auditLogs: [res.log, ...(prev.auditLogs || [])]
+      } : prev);
+      return true;
+    }
+    return false;
+  };
+
+  const markNotificationRead = async (id: string) => {
+    const res = await authFetch(`/api/admin/notifications/${id}/read`, 'PUT');
+    if (res) {
+      setData(prev => prev ? {
+        ...prev,
+        notifications: (prev.notifications || []).map(n => n.id === id ? { ...n, read: true } : n)
+      } : prev);
+      return true;
+    }
+    return false;
+  };
+
+  const deleteNotification = async (id: string) => {
+    const res = await authFetch(`/api/admin/notifications/${id}`, 'DELETE');
+    if (res) {
+      setData(prev => prev ? {
+        ...prev,
+        notifications: (prev.notifications || []).filter(n => n.id !== id)
+      } : prev);
+      return true;
+    }
+    return false;
+  };
+
   const changePassword = async (oldPass: string, newPass: string) => {
     try {
       const res = await fetch('/api/admin/password', {
@@ -660,7 +1028,31 @@ export const AgencyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         deleteBlogArticle,
         updateLeadStatus,
         updateLead,
+        createLead,
+        importLeads,
         deleteLead,
+        createClient,
+        updateClient,
+        deleteClient,
+        createProject,
+        updateProject,
+        deleteProject,
+        createTask,
+        updateTask,
+        deleteTask,
+        createCampaign,
+        updateCampaign,
+        deleteCampaign,
+        createResearchProject,
+        updateResearchProject,
+        deleteResearchProject,
+        saveIntegrations,
+        createInvoice,
+        updateInvoice,
+        deleteInvoice,
+        recordAuditLog,
+        markNotificationRead,
+        deleteNotification,
         deleteMedia,
         deleteMediaItem: deleteMedia
       }}

@@ -1,4 +1,18 @@
 import { AgencyData } from '../src/types';
+import {
+  telcaPricingPackages,
+  telcaFaqs,
+  telcaClients,
+  telcaProjects,
+  telcaTasks,
+  telcaCampaigns,
+  telcaResearchProjects,
+  telcaIntegrations,
+  telcaAuditLogs,
+  telcaInvoices,
+  telcaNotifications,
+  telcaLeads
+} from './telcaData';
 
 export const initialAgencyData: AgencyData = {
   settings: {
@@ -847,5 +861,14 @@ Google algorithms now aggressively penalize slow, bloated websites. If your LCP 
       uploadDate: '2026-08-05',
       type: 'image'
     }
-  ]
+  ],
+  clients: telcaClients,
+  projects: telcaProjects,
+  tasks: telcaTasks,
+  campaigns: telcaCampaigns,
+  researchProjects: telcaResearchProjects,
+  integrations: telcaIntegrations,
+  auditLogs: telcaAuditLogs,
+  invoices: telcaInvoices,
+  notifications: telcaNotifications
 };

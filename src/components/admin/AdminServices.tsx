@@ -158,9 +158,9 @@ export const AdminServices: React.FC = () => {
               <div className="mt-4 p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-[11px] space-y-0.5">
                 <div className="text-slate-400 font-medium">Starting Pricing Matrix:</div>
                 <div className="flex items-center justify-between text-slate-200 font-bold">
-                  <span>PKR: Rs. {service.startingPricePKR.toLocaleString()}</span>
-                  <span>USD: ${service.startingPriceUSD.toLocaleString()}</span>
-                  <span>GBP: £{service.startingPriceGBP.toLocaleString()}</span>
+                  <span>PKR: Rs. {(service.startingPricePKR ?? 0).toLocaleString()}</span>
+                  <span>USD: ${(service.startingPriceUSD ?? 0).toLocaleString()}</span>
+                  <span>GBP: £{(service.startingPriceGBP ?? 0).toLocaleString()}</span>
                 </div>
               </div>
             </div>

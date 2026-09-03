@@ -616,6 +616,330 @@ async function startServer() {
   });
 
   // ==========================================
+  // CRM, CLIENTS, PROJECTS, CAMPAIGNS, RESEARCH, AUDIT
+  // ==========================================
+
+  // Admin Leads (Create & Bulk Import)
+  app.post('/api/admin/leads', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.leads = data.leads || [];
+    if (Array.isArray(req.body)) {
+      // Bulk CSV Import
+      const newItems = req.body.map((item: any) => ({
+        ...item,
+        id: item.id || `lead_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        createdAt: item.createdAt || new Date().toISOString()
+      }));
+      data.leads.unshift(...newItems);
+      saveData(data);
+      res.status(201).json({ success: true, count: newItems.length });
+      return;
+    }
+    const newLead = {
+      ...req.body,
+      id: req.body.id || `lead_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: req.body.createdAt || new Date().toISOString()
+    };
+    data.leads.unshift(newLead);
+    saveData(data);
+    res.status(201).json({ success: true, lead: newLead });
+  });
+
+  // Clients
+  app.get('/api/admin/clients', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.clients || []);
+  });
+
+  app.post('/api/admin/clients', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.clients = data.clients || [];
+    const newClient = {
+      ...req.body,
+      id: req.body.id || `cli_${Date.now()}`
+    };
+    data.clients.unshift(newClient);
+    saveData(data);
+    res.status(201).json({ success: true, client: newClient });
+  });
+
+  app.put('/api/admin/clients/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.clients = data.clients || [];
+    const idx = data.clients.findIndex(c => c.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Client not found' });
+      return;
+    }
+    data.clients[idx] = { ...data.clients[idx], ...req.body, id: req.params.id };
+    saveData(data);
+    res.json({ success: true, client: data.clients[idx] });
+  });
+
+  app.delete('/api/admin/clients/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.clients = (data.clients || []).filter(c => c.id !== req.params.id);
+    saveData(data);
+    res.json({ success: true });
+  });
+
+  // Projects
+  app.get('/api/admin/projects', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.projects || []);
+  });
+
+  app.post('/api/admin/projects', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.projects = data.projects || [];
+    const newProject = {
+      ...req.body,
+      id: req.body.id || `proj_${Date.now()}`
+    };
+    data.projects.unshift(newProject);
+    saveData(data);
+    res.status(201).json({ success: true, project: newProject });
+  });
+
+  app.put('/api/admin/projects/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.projects = data.projects || [];
+    const idx = data.projects.findIndex(p => p.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+    data.projects[idx] = { ...data.projects[idx], ...req.body, id: req.params.id };
+    saveData(data);
+    res.json({ success: true, project: data.projects[idx] });
+  });
+
+  app.delete('/api/admin/projects/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.projects = (data.projects || []).filter(p => p.id !== req.params.id);
+    saveData(data);
+    res.json({ success: true });
+  });
+
+  // Tasks
+  app.get('/api/admin/tasks', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.tasks || []);
+  });
+
+  app.post('/api/admin/tasks', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.tasks = data.tasks || [];
+    const newTask = {
+      ...req.body,
+      id: req.body.id || `task_${Date.now()}`
+    };
+    data.tasks.unshift(newTask);
+    saveData(data);
+    res.status(201).json({ success: true, task: newTask });
+  });
+
+  app.put('/api/admin/tasks/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.tasks = data.tasks || [];
+    const idx = data.tasks.findIndex(t => t.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Task not found' });
+      return;
+    }
+    data.tasks[idx] = { ...data.tasks[idx], ...req.body, id: req.params.id };
+    saveData(data);
+    res.json({ success: true, task: data.tasks[idx] });
+  });
+
+  app.delete('/api/admin/tasks/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.tasks = (data.tasks || []).filter(t => t.id !== req.params.id);
+    saveData(data);
+    res.json({ success: true });
+  });
+
+  // Campaigns
+  app.get('/api/admin/campaigns', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.campaigns || []);
+  });
+
+  app.post('/api/admin/campaigns', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.campaigns = data.campaigns || [];
+    const newCamp = {
+      ...req.body,
+      id: req.body.id || `camp_${Date.now()}`
+    };
+    data.campaigns.unshift(newCamp);
+    saveData(data);
+    res.status(201).json({ success: true, campaign: newCamp });
+  });
+
+  app.put('/api/admin/campaigns/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.campaigns = data.campaigns || [];
+    const idx = data.campaigns.findIndex(c => c.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Campaign not found' });
+      return;
+    }
+    data.campaigns[idx] = { ...data.campaigns[idx], ...req.body, id: req.params.id };
+    saveData(data);
+    res.json({ success: true, campaign: data.campaigns[idx] });
+  });
+
+  app.delete('/api/admin/campaigns/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.campaigns = (data.campaigns || []).filter(c => c.id !== req.params.id);
+    saveData(data);
+    res.json({ success: true });
+  });
+
+  // Research Projects
+  app.get('/api/admin/research', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.researchProjects || []);
+  });
+
+  app.post('/api/admin/research', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.researchProjects = data.researchProjects || [];
+    const newResearch = {
+      ...req.body,
+      id: req.body.id || `res_${Date.now()}`,
+      date: req.body.date || new Date().toISOString().split('T')[0]
+    };
+    data.researchProjects.unshift(newResearch);
+    saveData(data);
+    res.status(201).json({ success: true, research: newResearch });
+  });
+
+  app.put('/api/admin/research/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.researchProjects = data.researchProjects || [];
+    const idx = data.researchProjects.findIndex(r => r.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Research project not found' });
+      return;
+    }
+    data.researchProjects[idx] = { ...data.researchProjects[idx], ...req.body, id: req.params.id };
+    saveData(data);
+    res.json({ success: true, research: data.researchProjects[idx] });
+  });
+
+  app.delete('/api/admin/research/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.researchProjects = (data.researchProjects || []).filter(r => r.id !== req.params.id);
+    saveData(data);
+    res.json({ success: true });
+  });
+
+  // Integrations
+  app.get('/api/admin/integrations', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.integrations || []);
+  });
+
+  app.put('/api/admin/integrations', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    if (Array.isArray(req.body)) {
+      data.integrations = req.body;
+      saveData(data);
+      res.json({ success: true, integrations: data.integrations });
+      return;
+    }
+    res.status(400).json({ error: 'Integrations must be an array' });
+  });
+
+  // Invoices & Finance
+  app.get('/api/admin/invoices', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.invoices || []);
+  });
+
+  app.post('/api/admin/invoices', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.invoices = data.invoices || [];
+    const newInv = {
+      ...req.body,
+      id: req.body.id || `inv_${Date.now()}`
+    };
+    data.invoices.unshift(newInv);
+    saveData(data);
+    res.status(201).json({ success: true, invoice: newInv });
+  });
+
+  app.put('/api/admin/invoices/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.invoices = data.invoices || [];
+    const idx = data.invoices.findIndex(i => i.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Invoice not found' });
+      return;
+    }
+    data.invoices[idx] = { ...data.invoices[idx], ...req.body, id: req.params.id };
+    saveData(data);
+    res.json({ success: true, invoice: data.invoices[idx] });
+  });
+
+  app.delete('/api/admin/invoices/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.invoices = (data.invoices || []).filter(i => i.id !== req.params.id);
+    saveData(data);
+    res.json({ success: true });
+  });
+
+  // Audit Logs
+  app.get('/api/admin/audit-logs', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.auditLogs || []);
+  });
+
+  app.post('/api/admin/audit-logs', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.auditLogs = data.auditLogs || [];
+    const newLog = {
+      ...req.body,
+      id: `aud_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+      date: req.body.date || new Date().toISOString().split('T')[0],
+      time: req.body.time || new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
+    data.auditLogs.unshift(newLog);
+    // Keep max 200 logs
+    if (data.auditLogs.length > 200) {
+      data.auditLogs = data.auditLogs.slice(0, 200);
+    }
+    saveData(data);
+    res.status(201).json({ success: true, log: newLog });
+  });
+
+  // Notifications
+  app.get('/api/admin/notifications', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    res.json(data.notifications || []);
+  });
+
+  app.put('/api/admin/notifications/:id/read', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.notifications = data.notifications || [];
+    const idx = data.notifications.findIndex(n => n.id === req.params.id);
+    if (idx !== -1) {
+      data.notifications[idx].read = true;
+      saveData(data);
+    }
+    res.json({ success: true });
+  });
+
+  app.delete('/api/admin/notifications/:id', requireAdminAuth, (req: Request, res: Response) => {
+    const data = getData();
+    data.notifications = (data.notifications || []).filter(n => n.id !== req.params.id);
+    saveData(data);
+    res.json({ success: true });
+  });
+
+  // ==========================================
   // VITE / STATIC CLIENT INTEGRATION
   // ==========================================
   if (process.env.NODE_ENV !== 'production') {
