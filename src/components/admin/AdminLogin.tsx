@@ -3,7 +3,6 @@ import { useAgency } from '../../context/AgencyContext';
 import {
   Lock,
   User,
-  ShieldCheck,
   ArrowRight,
   Loader2,
   AlertCircle,
@@ -19,8 +18,8 @@ interface AdminLoginProps {
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onClose, onSuccess }) => {
   const { login } = useAgency();
-  const [username, setUsername] = useState('marketing');
-  const [password, setPassword] = useState('25802580');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -111,19 +110,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onClose, onSuccess }) =>
                 placeholder="••••••••"
                 autoComplete="current-password"
               />
-            </div>
-          </div>
-
-          {/* Quick Demo Credentials Tip */}
-          <div className="p-3 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-[11px] text-slate-300 space-y-1">
-            <div className="font-bold text-indigo-300 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin Credentials</span>
-            </div>
-            <div className="text-slate-400 font-mono text-[10px]">
-              Username: <span className="text-slate-200 font-bold">marketing</span>
-              <br />
-              Password: <span className="text-slate-200 font-bold">25802580</span>
             </div>
           </div>
 
